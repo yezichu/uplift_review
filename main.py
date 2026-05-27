@@ -7,6 +7,7 @@ from model.T_learner import TLearnerEstimator
 from model.X_learner import XLearnerEstimator
 from model.R_learner import RLearnerEstimator
 from model.TARNet import TARNetEstimator
+from model.CFRNet import CFRNetEstimator
 from data.dataset import load_ihdp_data, IPDHDataset, IPHDDataLoader
 from utils.metric import pehe, policy_risk, uplift_curve, uplift_auc_score, qini_curve_industry, qini_auc_score_industry
 from utils.plot import plot_uplift_curve, plot_qini_curve
@@ -51,7 +52,11 @@ def main():
     elif args.model == 'tarnet':
         tarnet = TARNetEstimator(x_dim = 25, hidden_dim = 64)
         tarnet.fit(train_loader, valid_loader, 100)
-        tau_hat_list, tau_true_list = tarnet.evaluate(test_loader)
+        tau_hat_list, tau_true_list = tarnet.evaluate(test_loader)     
+    elif args.model == 'cfrnet':
+        cfrnet = CFRNetEstimator(x_dim = 25, hidden_dim = 64)
+        cfrnet.fit(train_loader, valid_loader, 100)
+        tau_hat_list, tau_true_list = cfrnet.evaluate(test_loader)
         
     pehe_score = pehe(tau_hat_list, tau_true_list)
     print("PEHE:", pehe_score) 
