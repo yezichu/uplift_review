@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from model.backbone import Backbone
-from loss.causal_loss import MSElossWapper
+from loss.causal_loss import MSElossWrapper
 from engine.trainer import Trainer
 
 
@@ -22,7 +22,7 @@ class SLearner(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         ) 
-        self.loss_fn = MSElossWapper()
+        self.loss_fn = MSElossWrapper()
         
     def forward(self, x, t):
         xt =  torch.cat([x, t], dim=-1)

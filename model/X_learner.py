@@ -2,12 +2,18 @@ import torch
 import torch.nn as nn
 from model.backbone import Backbone
 from engine.trainer import Trainer
-from loss.causal_loss import MSElossWapper, BCElossWapper
+from loss.causal_loss import MSElossWrapper, BCElossWrapper
 
 """
     相比 T-learner，X-learner 在 treatment/control 样本严重不均衡时通常效果更好，
     因为它能 cross-impute treatment effect。最后用 e(x)加权，如果 e(x) 越高，那么 mu0
     估的越好，也就是 tau0 估计得更准。
+    优点
+        1. X-learner 在 treatment group size 极不平衡时效果很好
+        2. 往往比 S-Learner、T-Learner 有更好的 CATE 精度
+    缺点
+        1. Error propagation
+        2. 两阶段学习，工程复杂
 """
 
 class OutcomeModel(nn.Module):
@@ -19,7 +25,7 @@ class OutcomeModel(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         )
-        self.loss_fn = MSElossWapper()
+        self.loss_fn = MSElossWrapper()
         self.type = type
         
     def forward(self, x):
@@ -51,7 +57,7 @@ class CATERegression(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         )
-        self.loss_fn = MSElossWapper()
+        self.loss_fn = MSElossWrapper()
         
     def forward(self, x):
         y_pred = self.head(self.backbone(x))
@@ -76,7 +82,7 @@ class PropensityModel(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         )
-        self.loss_fn = BCElossWapper()
+        self.loss_fn = BCElossWrapper()
         
     def forward(self, x):
         logit = self.head(self.backbone(x))

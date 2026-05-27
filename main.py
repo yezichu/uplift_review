@@ -5,6 +5,8 @@ import argparse
 from model.S_learner import SLearnerEstimator
 from model.T_learner import TLearnerEstimator
 from model.X_learner import XLearnerEstimator
+from model.R_learner import RLearnerEstimator
+from model.TARNet import TARNetEstimator
 from data.dataset import load_ihdp_data, IPDHDataset, IPHDDataLoader
 from utils.metric import pehe, policy_risk, uplift_curve, uplift_auc_score, qini_curve_industry, qini_auc_score_industry
 from utils.plot import plot_uplift_curve, plot_qini_curve
@@ -42,6 +44,14 @@ def main():
         xlearner = XLearnerEstimator(x_dim = 25, hidden_dim = 64)
         xlearner.fit(train_loader, valid_loader, 100, lr=1e-3)
         tau_hat_list, tau_true_list = xlearner.evaluate(test_loader)
+    elif args.model == 'r-learner':
+        xlearner = RLearnerEstimator(x_dim = 25, hidden_dim = 64)
+        xlearner.fit(train_loader, valid_loader, 100, lr=1e-3)
+        tau_hat_list, tau_true_list = xlearner.evaluate(test_loader)
+    elif args.model == 'tarnet':
+        tarnet = TARNetEstimator(x_dim = 25, hidden_dim = 64)
+        tarnet.fit(train_loader, valid_loader, 100)
+        tau_hat_list, tau_true_list = tarnet.evaluate(test_loader)
         
     pehe_score = pehe(tau_hat_list, tau_true_list)
     print("PEHE:", pehe_score) 

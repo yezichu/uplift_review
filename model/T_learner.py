@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from model.backbone import Backbone
 from engine.trainer import Trainer
-from loss.causal_loss import MSElossWapper
+from loss.causal_loss import MSElossWrapper
 
 
 class TLearner(nn.Module):
@@ -13,6 +13,7 @@ class TLearner(nn.Module):
     缺点
         1. 数据利用率低
         2. 无倾向得分校正，难以抵消混杂变量带来的预估偏差
+        3. 在 treatment imbalance 下效果不好。
     """
     def __init__(self, x_dim, hidden_dim, type = 'treatment'):
         super().__init__()
@@ -22,7 +23,7 @@ class TLearner(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dim, 1)
         )
-        self.loss_fn = MSElossWapper()
+        self.loss_fn = MSElossWrapper()
         self.type = type
         
     def forward(self, x):
