@@ -67,7 +67,31 @@ class DragonnetlossWrapper(nn.Module):
         return loss_h + alpha * loss_gnn + beta * loss_tmle
         
         
+class DESCNlossWrapper(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.loss_h = nn.MSELoss(reduction="none")
+        self.loss_g = nn.BCEWithLogitsLoss()
+        
+    def forward(self, y0, y1, y, tau_pseudo, logit, t, alpha, beta1, beta0, gamma1, gamma0):
+        L_pi = self.loss_g(logit, t)
+        pi = torch.sigmoid(logit)
+        L_estr = self.loss_h(y*t, y1 * pi).mean()
+        L_escr = self.loss_h(y*(1-t), y0 * (1-pi)).mean()
+        
+        n_T = t.sum().clamp(min=1)
+        n_C = (1-t).sum().clamp(min=1)
             
+        y1_pseudo = y0 + tau_pseudo
+        y0_pseudo = y1 - tau_pseudo
+        
+        L_crosstr = self.loss_h(y*t, y1_pseudo).sum() / n_T
+        L_crosscr = self.loss_h(y*(1-t), y0_pseudo).sum() / n_C
+        total_loss = alpha * L_pi + beta1 * L_estr + beta0 * L_escr + gamma1 * L_crosstr + gamma0 * L_crosscr
+    
+        return total_loss
+        
+    
     
     
 def rbf_kernel(x1, x2, sigma=1.0):
