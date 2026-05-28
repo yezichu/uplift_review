@@ -9,6 +9,7 @@ from model.R_learner import RLearnerEstimator
 from model.TARNet import TARNetEstimator
 from model.CFRNet import CFRNetEstimator
 from model.Dragonnet import DragonnetEstimator
+from model.EUEN import EUENEstimator
 
 from data.dataset import load_ihdp_data, IPDHDataset, IPHDDataLoader
 from utils.metric import pehe, policy_risk, uplift_curve, uplift_auc_score, qini_curve_industry, qini_auc_score_industry
@@ -63,6 +64,11 @@ def main():
         dragonnet = DragonnetEstimator(x_dim = 25, hidden_dim = 64)
         dragonnet.fit(train_loader, valid_loader, 100)
         tau_hat_list, tau_true_list = dragonnet.evaluate(test_loader)
+    elif args.model == 'euen':
+        euen = EUENEstimator(x_dim = 25, hidden_dim = 64)
+        euen.fit(train_loader, valid_loader, 100)
+        tau_hat_list, tau_true_list = euen.evaluate(test_loader)    
+    
         
     pehe_score = pehe(tau_hat_list, tau_true_list)
     print("PEHE:", pehe_score) 

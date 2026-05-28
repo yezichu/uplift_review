@@ -5,9 +5,9 @@ from geomloss import SamplesLoss
 
 
 class MSElossWrapper(nn.Module):
-    def __init__(self):
+    def __init__(self, reduction = "mean"):
         super().__init__()
-        self.loss_fn = nn.MSELoss()
+        self.loss_fn = nn.MSELoss(reduction = reduction)
     def forward(self, y_pred, y_true):
         return self.loss_fn(y_pred, y_true)
 
