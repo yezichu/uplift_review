@@ -50,6 +50,25 @@ class CFRNetlossWrapper(nn.Module):
             raise ValueError(f"Unknown distance: {distance}")
         return loss + alpha * ipm
     
+class DragonnetlossWrapper(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.loss_h = nn.MSELoss()
+        self.loss_g = nn.BCEWithLogitsLoss()
+        
+    def forward(self, y_pred, y, g_nn, t, eps, alpha, beta):
+        g_prob = torch.sigmoid(g_nn)
+        loss_h = self.loss_h(y_pred, y)
+        loss_gnn = self.loss_g(g_nn, t)
+        # clever covariate
+        h = t / g_prob - (1 - t) / (1 - g_prob)
+        y_tmle = y_pred + eps * h
+        loss_tmle = self.loss_h(y_tmle, y)
+        return loss_h + alpha * loss_gnn + beta * loss_tmle
+        
+        
+            
+    
     
 def rbf_kernel(x1, x2, sigma=1.0):
     dist = torch.cdist(x1, x2)
